@@ -67,4 +67,20 @@ public class MemberServiceimpl implements MemberService {
     public void deleteById(Long memberId) {
         mr.deleteById(memberId);
     }
+
+    @Override
+    public MemberDetailDTO findByIdEmail(String memberEmail) {
+        MemberEntity memberEntity = mr.findByMemberEmail(memberEmail);
+        MemberDetailDTO memberDetailDTO = MemberDetailDTO.toMemberDetailDTO(memberEntity);
+        return memberDetailDTO;
+    }
+
+    @Override
+    public Long update(MemberDetailDTO memberDetailDTO) {
+        // update 처리시 save 메서드 호출
+        // MemberDetailDTO -> MemberEntity
+        MemberEntity memberEntity = MemberEntity.toUpdateMember(memberDetailDTO);
+        Long memberId = mr.save(memberEntity).getId();
+        return memberId;
+    }
 }

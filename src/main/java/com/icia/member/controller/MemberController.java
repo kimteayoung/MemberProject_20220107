@@ -5,6 +5,8 @@ import com.icia.member.dto.MemberLoginDTO;
 import com.icia.member.dto.MemberSaveDTO;
 import com.icia.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +48,8 @@ public class MemberController {
         boolean loginResult = ms.login(memberLoginDTO);
         if (loginResult) {
             session.setAttribute(LOGIN_EMAIL, memberLoginDTO.getMemberEmail());
-            return "redirect:/member/";
+            //return "redirect:/member/";
+            return "member/mypage";
         }else {
             return "member/login";
         }
@@ -79,6 +82,45 @@ public class MemberController {
     public String deleteById(@PathVariable("memberId") Long memberId) {
         ms.deleteById(memberId);
         return "redirect:/member/";
+    }
+
+    // 회원삭제 (/member/5)
+    @DeleteMapping("{memberId}")
+    public ResponseEntity deleteById2(@PathVariable Long memberId) {
+        ms.deleteById(memberId);
+        /*
+            // 단순 화면 출력이 아닌 데이터를 리턴하고할 때 사용하는 리턴방식식
+           ResponseEntity: 데이터 & 상태코드(200, 400, 404, 405, 500 등)를 함께 리턴할 수 있음.
+            @ResponseBody: 데이터를 리턴할 수 있음.
+         */
+        // 200 코드를 리턴
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    // 수정화면 요청
+    @GetMapping("update")
+    public String updateForm(Model model, HttpSession session) {
+        String memberEmail = (String) session.getAttribute(LOGIN_EMAIL);
+        MemberDetailDTO member = ms.findByIdEmail(memberEmail);
+        model.addAttribute("member", member);
+        return "member/update";
+    }
+
+    // 수정처리(post)
+    @PostMapping("update")
+    public String update(@ModelAttribute MemberDetailDTO memberDetailDTO) {
+        Long memberId = ms.update(memberDetailDTO);
+        // 수정완료 후 해당회원의 상세페이지(findBy.html) 출력
+        return "redirect:/member/" + memberDetailDTO.getMemberId();
+
+    }
+
+    // 구정처리(put)
+    @PutMapping("{memberId}")
+    // json 으로 데이터가 전달되면 RequestBody로 받아줘야함.
+    public ResponseEntity update2(@RequestBody MemberDetailDTO memberDetailDTO) {
+        Long memberId = ms.update(memberDetailDTO);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 

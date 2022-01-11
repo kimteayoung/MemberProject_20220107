@@ -44,15 +44,26 @@ public class MemberController {
 
     // 로그인
     @PostMapping("login")
-    public String login(@ModelAttribute MemberLoginDTO memberLoginDTO, HttpSession session){
+    public String login(@ModelAttribute MemberLoginDTO memberLoginDTO, HttpSession session,
+                        @RequestParam(defaultValue = "/") String redirectURL ){
+        System.out.println("MemberController.loginForm");
+        System.out.println("redirectURL = " + redirectURL);
         boolean loginResult = ms.login(memberLoginDTO);
         if (loginResult) {
             session.setAttribute(LOGIN_EMAIL, memberLoginDTO.getMemberEmail());
-            //return "redirect:/member/";
-            return "member/mypage";
+//             return "redirect:/member/";
+//             return "member/mypage";
+
+            return "redirect:" + redirectURL; // 사용자가 요청한 주소호 보내주기 위해
         }else {
             return "member/login";
         }
+    }
+
+    @GetMapping("logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "index";
     }
 
     // 회원목록
@@ -115,7 +126,7 @@ public class MemberController {
 
     }
 
-    // 구정처리(put)
+    // 수정처리(put)
     @PutMapping("{memberId}")
     // json 으로 데이터가 전달되면 RequestBody로 받아줘야함.
     public ResponseEntity update2(@RequestBody MemberDetailDTO memberDetailDTO) {

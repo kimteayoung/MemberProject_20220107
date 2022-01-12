@@ -44,17 +44,23 @@ public class MemberController {
 
     // 로그인
     @PostMapping("login")
-    public String login(@ModelAttribute MemberLoginDTO memberLoginDTO, HttpSession session,
-                        @RequestParam(defaultValue = "/") String redirectURL ){
-        System.out.println("MemberController.loginForm");
-        System.out.println("redirectURL = " + redirectURL);
+    public String login(@ModelAttribute MemberLoginDTO memberLoginDTO, HttpSession session ){
+//                        @RequestParam(defaultValue = "/") String redirectURL )
+        System.out.println("MemberController.login");
+//        System.out.println("redirectURL = " + redirectURL);
         boolean loginResult = ms.login(memberLoginDTO);
         if (loginResult) {
             session.setAttribute(LOGIN_EMAIL, memberLoginDTO.getMemberEmail());
 //             return "redirect:/member/";
 //             return "member/mypage";
-
-            return "redirect:" + redirectURL; // 사용자가 요청한 주소호 보내주기 위해
+            String redirectURL = (String) session.getAttribute("redirectURL");
+            // 인터셉터를 거쳐서 오면 redirectURL에 값이 있을 것이고 그냥 로그인을 해서 오면 redirectURL에 값이 없을것임.
+            // 따라서 if else로 구분을 해줌.
+            if(redirectURL != null) {
+                return "redirect:" + redirectURL; // 사용자가 요청한 주소로 보내주기 위해
+            }else {
+                return "redirect:/";
+            }
         }else {
             return "member/login";
         }

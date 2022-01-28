@@ -38,7 +38,8 @@ public class MemberController {
 
     // 로그인폼
     @GetMapping("login")
-    public  String loginForm() {
+    public String loginForm(Model model){
+        model.addAttribute("login",new MemberLoginDTO());
         return "member/login";
     }
 
@@ -53,14 +54,12 @@ public class MemberController {
             session.setAttribute(LOGIN_EMAIL, memberLoginDTO.getMemberEmail());
 //             return "redirect:/member/";
 //             return "member/mypage";
-            String redirectURL = (String) session.getAttribute("redirectURL");
+//            String redirectURL = (String) session.getAttribute("redirectURL");
             // 인터셉터를 거쳐서 오면 redirectURL에 값이 있을 것이고 그냥 로그인을 해서 오면 redirectURL에 값이 없을것임.
             // 따라서 if else로 구분을 해줌.
-            if(redirectURL != null) {
-                return "redirect:" + redirectURL; // 사용자가 요청한 주소로 보내주기 위해
-            }else {
-                return "redirect:/";
-            }
+//            if(redirectURL != null) {
+//                return "redirect:" + redirectURL; // 사용자가 요청한 주소로 보내주기 위해
+            return "member/mypage";
         }else {
             return "member/login";
         }
@@ -82,12 +81,13 @@ public class MemberController {
 
     // 회원조회 (/member/5)
     @GetMapping("{memberId}")
-    public String fingById(@PathVariable("memberId") Long memberId, Model model) {
+    public String findById(@PathVariable("memberId") Long memberId, Model model) {
         MemberDetailDTO member = ms.findById(memberId);
         model.addAttribute("member", member);
         return "member/findById";
     }
 
+    // 회원조회 ajax
     @PostMapping("{memberId}")
     public @ResponseBody MemberDetailDTO detail(@PathVariable("memberId") Long memberId){
         MemberDetailDTO member = ms.findById(memberId);
